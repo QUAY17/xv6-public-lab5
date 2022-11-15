@@ -69,6 +69,9 @@ void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
 uint            numFreePages(void);
+void            increfcount(uint);
+void            decrefcount(uint);
+uint            getrefcount(uint);
 
 // kbd.c
 void            kbdintr(void);
