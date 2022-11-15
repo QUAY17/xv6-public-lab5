@@ -344,6 +344,38 @@ bad:
   return 0;
 }
 
+// Modified copyuvm for lab5 copyuvm_cow
+pde_t*
+copyuvm_cow(pde_t *pgdir, uint sz)
+{
+  pde_t *d;
+  pte_t *pte;
+  uint pa, i, flags;
+  //char *mem;
+
+  if((d = setupkvm()) == 0)
+    return 0;
+  for(i = 0; i < sz; i += PGSIZE){
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("copyuvm: page not present");
+    *pte &= ~PTE_W; // read only permissions for parent page
+    pa = PTE_ADDR(*pte);
+    flags = PTE_FLAGS(*pte);
+    if(mappages(d, (void*)i, PGSIZE, pa, flags) < 0);
+      goto bad;
+    increfcount(pa);
+  }
+  lcr3(V2P(pgdir)): // Flush TLB
+  return d;
+
+bad:
+  freevm(d);
+  lcr3(V2P(pgdir)): // Flush TLB since entries have been changed in the process page table
+  return 0;
+}
+
 //PAGEBREAK!
 // Map user virtual address to kernel address.
 char*

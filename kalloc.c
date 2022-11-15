@@ -118,33 +118,33 @@ uint numFreePages(void){
   return freepages;
 }
 
-void decrefcount(uint v)
+void decrefcount(uint pa)
 {
-  if(v < (uint)V2P(end) || v >= PHYSTOP)
+  if(pa < (uint)V2P(end) || pa >= PHYSTOP)
     panic("decrementReferenceCount");
 
   acquire(&kmem.lock);
-  --kmem.pagerefcount[v >> PGSHIFT];
+  --kmem.pagerefcount[pa >> PGSHIFT];
   release(&kmem.lock);
 }
 
-void increfcount(uint v)
+void increfcount(uint pa)
 {
-  if(v < (uint)V2P(end) || v >= PHYSTOP)
+  if(pa < (uint)V2P(end) || pa >= PHYSTOP)
     panic("incrementReferenceCount");
 
   acquire(&kmem.lock);
-  ++kmem.pagerefcount[v >> PGSHIFT];
+  ++kmem.pagerefcount[pa >> PGSHIFT];
   release(&kmem.lock);
 }
-uint getrefcount(uint v)
+uint getrefcount(uint pa)
 {
-  if(v < (uint)V2P(end) || v >= PHYSTOP)
+  if(pa < (uint)V2P(end) || pa >= PHYSTOP)
     panic("getReferenceCount");
   uint count;
 
   acquire(&kmem.lock);
-  count = kmem.pagerefcount[v >> PGSHIFT];
+  count = kmem.pagerefcount[pa >> PGSHIFT];
   release(&kmem.lock);
 
   return count;
