@@ -35,7 +35,7 @@ kinit1(void *vstart, void *vend)
 {
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
-  knem.freepages = 0;
+  kmem.freepages = 0;
   freerange(vstart, vend);
 }
 
@@ -100,10 +100,11 @@ kalloc(void)
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = kmem.freelist;
-  if(r)
+  if(r){
     kmem.freelist = r->next;
-    knem.freepages--; // Decrement the free pages count when page is allocated
-    knem.pagerefcount[V2P((char*)r) >> PGSHIFT] = 1; // Ref count of a page is set to 1 when allocated
+    kmem.freepages--; // Decrement the free pages count when page is allocated
+    kmem.pagerefcount[V2P((char*)r) >> PGSHIFT] = 1; // Ref count of a page is set to 1 when allocated
+  }
   if(kmem.use_lock)
     release(&kmem.lock);
   return (char*)r;
